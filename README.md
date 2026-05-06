@@ -41,6 +41,12 @@ El profesor puede cargar notas de todos los alumnos inscritos en cada evaluació
 
 El sistema habilita automáticamente los recuperatorios cuando corresponde.
 
+Además:
+
+* las notas deben estar entre 0 y 10
+* el sistema rechaza notas inválidas
+* si un parcial está aprobado no solicita el recuperatorio asociado
+
 ---
 
 ### Ver materias
@@ -125,6 +131,10 @@ Si una evaluación desaprobada tiene recuperatorio configurado:
 
 * el sistema habilita automáticamente el recuperatorio correspondiente
 
+Si el parcial ya fue aprobado:
+
+* el recuperatorio no se solicita
+
 ---
 
 # Aprobación de final
@@ -151,7 +161,16 @@ Si el recuperatorio final es 4 o más se aprueba la materia, si no desaprueba la
 
 El sistema calcula automáticamente el promedio utilizando todas las notas cargadas:
 
-Promedio = Notas cargadas / Cant. de evaluaciones
+Promedio = Suma de notas / Cantidad de notas registradas
+
+Actualmente el promedio incluye:
+
+* parciales
+* recuperatorios
+* trabajos prácticos
+* participación
+* final
+* recuperatorio final
 
 ---
 
@@ -183,6 +202,36 @@ antes de permitir el acceso.
 
 ---
 
+## Validación de notas
+
+El sistema valida que:
+
+* una nota no sea menor a 0
+* una nota no sea mayor a 10
+
+En caso contrario se muestra un mensaje de error.
+
+---
+
+## Validación de recuperatorios
+
+El sistema verifica automáticamente:
+
+* si el parcial fue aprobado
+* si corresponde habilitar recuperatorio
+
+---
+
+## Validación de selección de materias
+
+El sistema controla:
+
+* opciones inválidas
+* accesos fuera de rango
+* selección incorrecta de materias
+
+---
+
 # Estados académicos posibles
 
 El sistema puede mostrar:
@@ -195,3 +244,29 @@ El sistema puede mostrar:
 * Desaprobado
 
 ---
+
+# Manejo de errores
+
+El sistema contempla:
+
+* validación de datos inválidos
+* control de inscripciones duplicadas
+* validación de usuarios existentes
+* manejo de materias sin alumnos
+* control de acceso mediante login
+* prevención de carga de notas inválidas
+
+---
+
+# Casos de prueba implementados
+
+El sistema cuenta con pruebas automáticas utilizando PyTest para validar:
+
+* carga correcta de notas
+* rechazo de notas inválidas
+* cálculo correcto de promedio
+* prevención de registros duplicados
+* flujo completo del sistema
+* recuperatorios
+* escenarios sin estudiantes
+* estados académicos finales
