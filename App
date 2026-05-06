@@ -1,13 +1,27 @@
+Sistema Académico en Python
 # ======================================================
-# SISTEMA ACADÉMICO
+# SISTEMA ACADÉMICO (SIN ADMINISTRADOR)
 # ======================================================
 
-# ---------------- LOGIN ADMIN ----------------
 
-ADMIN_USER = "admin"
-ADMIN_PASS = "1234"
 
-# ---------------- CLASES ----------------
+# ======================================================
+# CLASES
+# ======================================================
+
+class EstadoAcademico:
+
+    def __init__(self):
+
+        self.parcial1 = None
+        self.recup1 = None
+
+        self.parcial2 = None
+        self.recup2 = None
+
+        self.final = None
+        self.recup_final = None
+
 
 class Profesor:
 
@@ -34,8 +48,11 @@ class Alumno:
         self.nombre = nombre
         self.apellido = apellido
         self.dni = dni
-        self.notas = {}
+
         self.materias = []
+
+        # clave = nombre materia
+        self.estados = {}
 
     def mostrar_datos(self):
 
@@ -49,16 +66,19 @@ class Materia:
         self.nombre = nombre
         self.profesor = None
         self.alumnos = []
-        self.cantidad_evaluaciones = 0
 
-    # ---------- PROFESOR ----------
+    # ==================================================
+    # PROFESOR
+    # ==================================================
 
     def asignar_profesor(self, profesor):
 
         self.profesor = profesor
         profesor.materias.append(self)
 
-    # ---------- ALUMNOS ----------
+    # ==================================================
+    # ALUMNOS
+    # ==================================================
 
     def inscribir_alumno(self, alumno):
 
@@ -67,72 +87,198 @@ class Materia:
             self.alumnos.append(alumno)
             alumno.materias.append(self)
 
+            alumno.estados[self.nombre] = EstadoAcademico()
+
             print("Alumno inscrito correctamente")
 
         else:
             print("El alumno ya está inscrito")
 
-    # ---------- EVALUACIONES ----------
-
-    def cargar_evaluaciones(self, cantidad):
-
-        self.cantidad_evaluaciones = cantidad
-
-    # ---------- CARGAR NOTAS ----------
+    # ==================================================
+    # CARGAR NOTAS
+    # ==================================================
 
     def cargar_notas(self):
 
         for alumno in self.alumnos:
 
-            notas = []
+            estado = alumno.estados[self.nombre]
 
-            print(f"\nCargando notas de {alumno.nombre} {alumno.apellido}")
+            print(
+                f"\n===== {alumno.nombre} {alumno.apellido} ====="
+            )
 
-            for i in range(self.cantidad_evaluaciones):
+            # ------------------------------------------
+            # PARCIAL 1
+            # ------------------------------------------
 
-                nota = float(
-                    input(f"Nota evaluación {i+1}: ")
+            if estado.parcial1 is None:
+
+                estado.parcial1 = float(
+                    input("Nota Parcial 1: ")
                 )
 
-                notas.append(nota)
+            # RECUPERATORIO 1
 
-            alumno.notas[self.nombre] = notas
+            if estado.parcial1 < 4:
 
-    # ---------- PROMEDIO ----------
+                print("Recuperatorio Parcial 1 habilitado")
+
+                estado.recup1 = float(
+                    input("Nota Recuperatorio 1: ")
+                )
+
+            # ------------------------------------------
+            # PARCIAL 2
+            # ------------------------------------------
+
+            if estado.parcial2 is None:
+
+                estado.parcial2 = float(
+                    input("Nota Parcial 2: ")
+                )
+
+            # RECUPERATORIO 2
+
+            if estado.parcial2 < 4:
+
+                print("Recuperatorio Parcial 2 habilitado")
+
+                estado.recup2 = float(
+                    input("Nota Recuperatorio 2: ")
+                )
+
+            # ------------------------------------------
+            # VERIFICAR REGULARIDAD
+            # ------------------------------------------
+
+            nota1 = estado.parcial1
+            nota2 = estado.parcial2
+
+            if estado.recup1 is not None:
+                nota1 = estado.recup1
+
+            if estado.recup2 is not None:
+                nota2 = estado.recup2
+
+            # PROMOCIÓN
+
+            if nota1 >= 8 and nota2 >= 8:
+
+                print("El alumno promociona la materia")
+                continue
+
+            # DESAPROBADO
+
+            if nota1 < 4 or nota2 < 4:
+
+                print("Alumno desaprobado")
+                continue
+
+            # ------------------------------------------
+            # FINAL
+            # ------------------------------------------
+
+            estado.final = float(
+                input("Nota Final: ")
+            )
+
+            # RECUPERATORIO FINAL
+
+            if estado.final < 4:
+
+                print("Recuperatorio Final habilitado")
+
+                estado.recup_final = float(
+                    input("Nota Recuperatorio Final: ")
+                )
+
+    # ==================================================
+    # CALCULAR PROMEDIO
+    # ==================================================
 
     def calcular_promedio(self, alumno):
 
-        if self.nombre in alumno.notas:
+        estado = alumno.estados[self.nombre]
 
-            notas = alumno.notas[self.nombre]
+        notas = []
 
-            promedio = sum(notas) / len(notas)
+        if estado.parcial1 is not None:
+            notas.append(estado.parcial1)
 
-            return promedio
+        if estado.parcial2 is not None:
+            notas.append(estado.parcial2)
+
+        if estado.final is not None:
+            notas.append(estado.final)
+
+        if len(notas) > 0:
+            return sum(notas) / len(notas)
 
         return 0
 
-    # ---------- RECUPERATORIO ----------
+    # ==================================================
+    # ESTADO FINAL
+    # ==================================================
 
-    def verificar_recuperatorio(self, alumno):
+    def estado_final(self, alumno):
 
-        promedio = self.calcular_promedio(alumno)
+        estado = alumno.estados[self.nombre]
 
-        if promedio < 6:
-            return "Habilitado para recuperatorio"
+        nota1 = estado.parcial1
+        nota2 = estado.parcial2
 
-        return "No necesita recuperatorio"
+        if estado.recup1 is not None:
+            nota1 = estado.recup1
+
+        if estado.recup2 is not None:
+            nota2 = estado.recup2
+
+        # PROMOCIÓN
+
+        if nota1 >= 8 and nota2 >= 8:
+            return "Promociona"
+
+        # DESAPROBADO
+
+        if nota1 < 4 or nota2 < 4:
+            return "Desaprobado"
+
+        # FINAL
+
+        if estado.final is not None:
+
+            if estado.final >= 4:
+                return "Aprobado"
+
+            else:
+
+                if estado.recup_final is not None:
+
+                    if estado.recup_final >= 4:
+                        return "Aprobado por recuperatorio final"
+
+                    else:
+                        return "Desaprobado"
+
+                return "Debe rendir recuperatorio final"
+
+        return "Debe rendir final"
 
 
-# ---------------- LISTAS ----------------
+# ======================================================
+# LISTAS
+# ======================================================
 
 profesores = []
 alumnos = []
 materias = []
 
+
 # ======================================================
 # VALIDACIONES
 # ======================================================
+
 
 def dni_profesor_existe(dni):
 
@@ -142,6 +288,7 @@ def dni_profesor_existe(dni):
             return True
 
     return False
+
 
 
 def dni_alumno_existe(dni):
@@ -157,6 +304,7 @@ def dni_alumno_existe(dni):
 # ======================================================
 # LOGIN PROFESOR
 # ======================================================
+
 
 def login_profesor():
 
@@ -180,6 +328,7 @@ def login_profesor():
 # LOGIN ALUMNO
 # ======================================================
 
+
 def login_alumno():
 
     usuario = input("Usuario: ")
@@ -199,188 +348,118 @@ def login_alumno():
 
 
 # ======================================================
-# MENÚ ADMINISTRADOR
+# REGISTRO PROFESOR
 # ======================================================
 
-def menu_admin():
 
-    while True:
+def registrar_profesor():
 
-        print("\n===== MENÚ ADMINISTRADOR =====")
-        print("1 - Crear profesor")
-        print("2 - Crear alumno")
-        print("3 - Crear materia")
-        print("0 - Salir")
+    print("
+===== REGISTRO PROFESOR =====")
 
-        opcion = input("Seleccione opción: ")
+    usuario = input("Usuario: ")
+    password = input("Contraseña: ")
+    nombre = input("Nombre: ")
+    apellido = input("Apellido: ")
+    dni = input("DNI: ")
 
-        # ---------- CREAR PROFESOR ----------
+    if dni_profesor_existe(dni):
 
-        if opcion == "1":
+        print("Ya existe un profesor con ese DNI")
 
-            print("\n===== NUEVO PROFESOR =====")
+    else:
 
-            usuario = input("Usuario: ")
-            password = input("Contraseña: ")
-            nombre = input("Nombre: ")
-            apellido = input("Apellido: ")
-            dni = input("DNI: ")
+        profesor = Profesor(
+            usuario,
+            password,
+            nombre,
+            apellido,
+            dni
+        )
 
-            # VALIDAR DNI
+        profesores.append(profesor)
 
-            if dni_profesor_existe(dni):
+        print("Profesor registrado correctamente")
 
-                print("Error: ya existe un profesor con ese DNI")
 
-            else:
+# ======================================================
+# REGISTRO ALUMNO
+# ======================================================
 
-                profesor = Profesor(
-                    usuario,
-                    password,
-                    nombre,
-                    apellido,
-                    dni
-                )
 
-                profesores.append(profesor)
+def registrar_alumno():
 
-                print("Profesor creado correctamente")
+    print("
+===== REGISTRO ALUMNO =====")
 
-        # ---------- CREAR ALUMNO ----------
+    usuario = input("Usuario: ")
+    password = input("Contraseña: ")
+    nombre = input("Nombre: ")
+    apellido = input("Apellido: ")
+    dni = input("DNI: ")
 
-        elif opcion == "2":
+    if dni_alumno_existe(dni):
 
-            print("\n===== NUEVO ALUMNO =====")
+        print("Ya existe un alumno con ese DNI")
 
-            usuario = input("Usuario: ")
-            password = input("Contraseña: ")
-            nombre = input("Nombre: ")
-            apellido = input("Apellido: ")
-            dni = input("DNI: ")
+    else:
 
-            # VALIDAR DNI
+        alumno = Alumno(
+            usuario,
+            password,
+            nombre,
+            apellido,
+            dni
+        )
 
-            if dni_alumno_existe(dni):
+        alumnos.append(alumno)
 
-                print("Error: ya existe un alumno con ese DNI")
-
-            else:
-
-                alumno = Alumno(
-                    usuario,
-                    password,
-                    nombre,
-                    apellido,
-                    dni
-                )
-
-                alumnos.append(alumno)
-
-                print("Alumno creado correctamente")
-
-        # ---------- CREAR MATERIA ----------
-
-        elif opcion == "3":
-
-            print("\n===== NUEVA MATERIA =====")
-
-            nombre = input("Nombre de la materia: ")
-
-            materia = Materia(nombre)
-
-            materias.append(materia)
-
-            print("Materia creada correctamente")
-
-        # ---------- SALIR ----------
-
-        elif opcion == "0":
-
-            break
-
-        else:
-            print("Opción inválida")
+        print("Alumno registrado correctamente")
 
 
 # ======================================================
 # MENÚ PROFESOR
 # ======================================================
 
+
 def menu_profesor(profesor):
 
     while True:
 
         print("\n===== MENÚ PROFESOR =====")
-        print("1 - Inscribirse como docente en materia")
-        print("2 - Cargar cantidad de evaluaciones")
-        print("3 - Cargar notas")
-        print("4 - Ver materias asignadas")
+        print("1 - Crear materia")
+        print("2 - Cargar notas")
+        print("3 - Ver materias")
+        print("4 - Ver alumnos y notas")
         print("0 - Salir")
 
         opcion = input("Seleccione opción: ")
 
-        # ---------- INSCRIBIRSE EN MATERIA ----------
+        # --------------------------------------------------
+        # CREAR MATERIA
 
         if opcion == "1":
 
-            print("\nMaterias disponibles:")
+            nombre = input("Nombre materia: ")
 
-            for index, materia in enumerate(materias):
-                print(f"{index} - {materia.nombre}")
+            materia = Materia(nombre)
 
-            opcion_materia = int(
-                input("Seleccione materia: ")
-            )
+            materia.asignar_profesor(profesor)
 
-            materia = materias[opcion_materia]
+            materias.append(materia)
 
-            if materia.profesor is None:
+            print("Materia creada correctamente")
 
-                materia.asignar_profesor(profesor)
-
-                print("Profesor asignado correctamente")
-
-            else:
-                print("La materia ya tiene profesor asignado")
-
-        # ---------- CARGAR EVALUACIONES ----------
+        # --------------------------------------------------
+        # CARGAR NOTAS
+        # --------------------------------------------------
 
         elif opcion == "2":
 
             if len(profesor.materias) == 0:
 
-                print("No tiene materias asignadas")
+                print("No tiene materias")
                 continue
-
-            print("\nSus materias:")
-
-            for index, materia in enumerate(profesor.materias):
-                print(f"{index} - {materia.nombre}")
-
-            opcion_materia = int(
-                input("Seleccione materia: ")
-            )
-
-            cantidad = int(
-                input("Cantidad de evaluaciones: ")
-            )
-
-            profesor.materias[
-                opcion_materia
-            ].cargar_evaluaciones(cantidad)
-
-            print("Cantidad cargada correctamente")
-
-        # ---------- CARGAR NOTAS ----------
-
-        elif opcion == "3":
-
-            if len(profesor.materias) == 0:
-
-                print("No tiene materias asignadas")
-                continue
-
-            print("\nSus materias:")
 
             for index, materia in enumerate(profesor.materias):
                 print(f"{index} - {materia.nombre}")
@@ -393,11 +472,10 @@ def menu_profesor(profesor):
                 opcion_materia
             ].cargar_notas()
 
-        # ---------- VER MATERIAS ----------
+        # --------------------------------------------------
+        # VER MATERIAS
 
-        elif opcion == "4":
-
-            print("\n===== MATERIAS ASIGNADAS =====")
+        elif opcion == "3":
 
             if len(profesor.materias) == 0:
 
@@ -408,10 +486,64 @@ def menu_profesor(profesor):
                 for materia in profesor.materias:
                     print("-", materia.nombre)
 
-        # ---------- SALIR ----------
+        # --------------------------------------------------
+        # VER ALUMNOS Y NOTAS
+        # --------------------------------------------------
+
+        elif opcion == "4":
+
+            if len(profesor.materias) == 0:
+
+                print("No tiene materias asignadas")
+                continue
+
+            for index, materia in enumerate(profesor.materias):
+                print(f"{index} - {materia.nombre}")
+
+            opcion_materia = int(
+                input("Seleccione materia: ")
+            )
+
+            materia = profesor.materias[opcion_materia]
+
+            print(f"
+===== ALUMNOS DE {materia.nombre} =====")
+
+            if len(materia.alumnos) == 0:
+
+                print("No hay alumnos inscritos")
+
+            else:
+
+                for alumno in materia.alumnos:
+
+                    estado = alumno.estados[materia.nombre]
+
+                    print(
+                        f"
+Alumno: {alumno.nombre} {alumno.apellido}"
+                    )
+
+                    print("Parcial 1:", estado.parcial1)
+                    print("Recup 1:", estado.recup1)
+                    print("Parcial 2:", estado.parcial2)
+                    print("Recup 2:", estado.recup2)
+                    print("Final:", estado.final)
+                    print("Recup Final:", estado.recup_final)
+
+                    promedio = materia.calcular_promedio(alumno)
+
+                    print(
+                        "Promedio:",
+                        round(promedio, 2)
+                    )
+
+                    print(
+                        "Estado:",
+                        materia.estado_final(alumno)
+                    )
 
         elif opcion == "0":
-
             break
 
         else:
@@ -422,22 +554,23 @@ def menu_profesor(profesor):
 # MENÚ ALUMNO
 # ======================================================
 
+
 def menu_alumno(alumno):
 
     while True:
 
         print("\n===== MENÚ ALUMNO =====")
         print("1 - Inscribirse a materia")
-        print("2 - Ver notas y promedio")
+        print("2 - Ver estado académico")
         print("0 - Salir")
 
         opcion = input("Seleccione opción: ")
 
-        # ---------- INSCRIBIRSE ----------
+        # --------------------------------------------------
+        # INSCRIPCIÓN
+        # --------------------------------------------------
 
         if opcion == "1":
-
-            print("\nMaterias disponibles:")
 
             for index, materia in enumerate(materias):
                 print(f"{index} - {materia.nombre}")
@@ -450,47 +583,40 @@ def menu_alumno(alumno):
                 opcion_materia
             ].inscribir_alumno(alumno)
 
-        # ---------- VER NOTAS ----------
+        # --------------------------------------------------
+        # VER ESTADO ACADÉMICO
+        # --------------------------------------------------
 
         elif opcion == "2":
 
-            print("\n===== NOTAS =====")
+            for materia in alumno.materias:
 
-            if len(alumno.materias) == 0:
+                print(f"\nMateria: {materia.nombre}")
 
-                print("No está inscrito en materias")
+                estado = alumno.estados[materia.nombre]
 
-            else:
+                print("Parcial 1:", estado.parcial1)
+                print("Recup 1:", estado.recup1)
 
-                for materia in alumno.materias:
+                print("Parcial 2:", estado.parcial2)
+                print("Recup 2:", estado.recup2)
 
-                    print(f"\nMateria: {materia.nombre}")
+                print("Final:", estado.final)
+                print("Recup Final:", estado.recup_final)
 
-                    if materia.nombre in alumno.notas:
+                promedio = materia.calcular_promedio(alumno)
 
-                        notas = alumno.notas[materia.nombre]
+                print(
+                    "Promedio:",
+                    round(promedio, 2)
+                )
 
-                        print("Notas:", notas)
-
-                        promedio = materia.calcular_promedio(alumno)
-
-                        print(
-                            "Promedio:",
-                            round(promedio, 2)
-                        )
-
-                        print(
-                            "Estado:",
-                            materia.verificar_recuperatorio(alumno)
-                        )
-
-                    else:
-                        print("Sin notas cargadas")
-
-        # ---------- SALIR ----------
+                print(
+                    "Estado:",
+                    materia.estado_final(alumno)
+                )
 
         elif opcion == "0":
-
             break
 
         else:
@@ -504,42 +630,48 @@ def menu_alumno(alumno):
 while True:
 
     print("\n===== SISTEMA ACADÉMICO =====")
-    print("1 - Login administrador")
-    print("2 - Login profesor")
-    print("3 - Login alumno")
+    print("1 - Registrarse como profesor")
+    print("2 - Registrarse como alumno")
+    print("3 - Login profesor")
+    print("4 - Login alumno")
     print("0 - Salir")
 
     opcion = input("Seleccione opción: ")
 
-    # ---------- ADMIN ----------
+    # --------------------------------------------------
+    # REGISTRO PROFESOR
 
     if opcion == "1":
 
-        usuario = input("Usuario admin: ")
-        password = input("Contraseña admin: ")
+        registrar_profesor()
 
-        if usuario == ADMIN_USER and password == ADMIN_PASS:
-
-            print("\nBienvenido administrador")
-
-            menu_admin()
-
-        else:
-            print("Datos incorrectos")
-
-    # ---------- PROFESOR ----------
+    # --------------------------------------------------
+    # REGISTRO ALUMNO
+    # --------------------------------------------------
 
     elif opcion == "2":
 
-        login_profesor()
+        registrar_alumno()
 
-    # ---------- ALUMNO ----------
+    # --------------------------------------------------
+    # LOGIN PROFESOR
+    # --------------------------------------------------
 
     elif opcion == "3":
 
+        login_profesor()
+
+    # --------------------------------------------------
+    # ALUMNO
+    # --------------------------------------------------
+
+    elif opcion == "4":
+
         login_alumno()
 
-    # ---------- SALIR ----------
+    # --------------------------------------------------
+    # SALIR
+    # --------------------------------------------------
 
     elif opcion == "0":
 
