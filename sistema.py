@@ -116,17 +116,25 @@ class Materia:
                         if estado.notas[parcial_asociado] >= 4:
                             continue
 
-                nota = float(
-                    input(f"Nota {evaluacion}: ")
-                )
+            while True:
 
-                estado.notas[evaluacion] = nota
+                nota = float(input(f"Nota {evaluacion}: "))
+
+                if 0 <= nota <= 10:
+                    estado.notas[evaluacion] = nota
+                    break
+
+                print("Error: la nota debe estar entre 0 y 10")
+
 
     # ==================================================
     # PROMEDIO
     # ==================================================
 
     def calcular_promedio(self, alumno):
+
+        if self.nombre not in alumno.estados:
+            return 0
 
         estado = alumno.estados[self.nombre]
 
@@ -159,10 +167,8 @@ class Materia:
         # PROMOCIÓN
         # ==============================================
 
-        if len(parciales) >= 2:
-
-            if parciales[0] >= 8 and parciales[1] >= 8:
-                return "Promociona"
+        if len(parciales) >= 2 and all(nota >= 8 for nota in parciales):
+            return "Promociona"
 
         # ==============================================
         # RECUPERATORIOS
@@ -468,9 +474,18 @@ def menu_profesor(profesor):
             for index, materia in enumerate(profesor.materias):
                 print(f"{index} - {materia.nombre}")
 
-            opcion_materia = int(
-                input("Seleccione materia: ")
-            )
+            try:
+
+                opcion_materia = int(input("Seleccione materia: "))
+
+                if opcion_materia < 0 or opcion_materia >= len(materias):
+                    print("Opción inválida")
+                    continue
+
+            except ValueError:
+
+                print("Debe ingresar un número")
+                continue
 
             profesor.materias[
                 opcion_materia
@@ -620,58 +635,59 @@ def menu_alumno(alumno):
 # MENÚ PRINCIPAL
 # ======================================================
 
-while True:
+if __name__ == "__main__":
 
-    print("\n===== SISTEMA ACADÉMICO =====")
-    print("1 - Registrarse como profesor")
-    print("2 - Registrarse como alumno")
-    print("3 - Login profesor")
-    print("4 - Login alumno")
-    print("0 - Salir")
+    while True:
 
-    opcion = input("Seleccione opción: ")
+        print("\n===== SISTEMA ACADÉMICO =====")
+        print("1 - Registrarse como profesor")
+        print("2 - Registrarse como alumno")
+        print("3 - Login profesor")
+        print("4 - Login alumno")
+        print("0 - Salir")
 
-    # ==================================================
-    # REGISTRO PROFESOR
-    # ==================================================
+        opcion = input("Seleccione opción: ")
 
-    if opcion == "1":
+        # ==============================================
+        # REGISTRO PROFESOR
+        # ==============================================
 
-        registrar_profesor()
+        if opcion == "1":
 
-    # ==================================================
-    # REGISTRO ALUMNO
-    # ==================================================
+            registrar_profesor()
 
-    elif opcion == "2":
+        # ==============================================
+        # REGISTRO ALUMNO
+        # ==============================================
 
-        registrar_alumno()
+        elif opcion == "2":
 
-    # ==================================================
-    # LOGIN PROFESOR
-    # ==================================================
+            registrar_alumno()
 
-    elif opcion == "3":
+        # ==============================================
+        # LOGIN PROFESOR
+        # ==============================================
 
-        login_profesor()
+        elif opcion == "3":
 
-    # ==================================================
-    # LOGIN ALUMNO
-    # ==================================================
+            login_profesor()
 
-    elif opcion == "4":
+        # ==============================================
+        # LOGIN ALUMNO
+        # ==============================================
 
-        login_alumno()
+        elif opcion == "4":
 
-    # ==================================================
-    # SALIR
-    # ==================================================
+            login_alumno()
 
-    elif opcion == "0":
+        # ==============================================
+        # SALIR
+        # ==============================================
 
-        print("Saliendo del sistema...")
-        break
+        elif opcion == "0":
 
-    else:
-        print("Opción inválida")
-        
+            print("Saliendo del sistema...")
+            break
+
+        else:
+            print("Opción inválida")
