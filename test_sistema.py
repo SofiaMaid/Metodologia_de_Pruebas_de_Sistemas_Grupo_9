@@ -1,4 +1,10 @@
-from sistema import Profesor, Alumno, Materia
+from sistema import (
+    Profesor,
+    Alumno,
+    Materia,
+    alumnos,
+    dni_alumno_existe
+)
 
 
 # =====================================================
@@ -123,28 +129,36 @@ def test_calculo_promedio_correcto():
 # REGISTRO DUPLICADO DE ESTUDIANTE
 # =====================================================
 
-def test_registro_duplicado_estudiante():
+def test_registro_duplicado_dni():
 
-    materia = Materia("Química")
+    # Limpiar lista global
+    alumnos.clear()
 
-    alumno = Alumno(
-        "alumno4",
+    # Primer alumno
+    alumno1 = Alumno(
+        "alumno1",
         "1234",
         "Pedro",
         "Martinez",
         "77777777"
     )
 
-    materia.inscribir_alumno(alumno)
+    alumnos.append(alumno1)
 
-    cantidad_antes = len(materia.alumnos)
+    alumno2 = Alumno(
+        "alumno2",
+        "5678",
+        "Juan",
+        "Lopez",
+        "77777777"
+    )
 
-    materia.inscribir_alumno(alumno)
+    # Validar duplicado
+    if not dni_alumno_existe(alumno2.dni):
+        alumnos.append(alumno2)
 
-    cantidad_despues = len(materia.alumnos)
-
-    assert cantidad_antes == cantidad_despues
-
+    # Verificar que NO se agregó
+    assert len(alumnos) == 1
 
 # =====================================================
 # TEST 5
