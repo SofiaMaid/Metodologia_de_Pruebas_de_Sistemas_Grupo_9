@@ -1,162 +1,197 @@
-# Metodologia_de_Pruebas_de_Sistemas_Grupo_9
-Este script implementa un sistema académico básico en Python con tres tipos de usuarios: administrador, profesor y alumno. El sistema funciona mediante menús interactivos por consola y permite gestionar materias, inscripciones, evaluaciones y notas.
+# Roles del sistema
 
-## Funcionamiento general
+# 1. Profesor
 
-Al iniciar el programa aparece un menú principal donde cada usuario puede iniciar sesión según su rol:
+El profesor puede registrarse e iniciar sesión con:
 
-* Administrador
-* Profesor
-* Alumno
-
-Cada rol tiene permisos y funciones diferentes.
-
----
-
-# Roles y funciones
-
-## 1. Administrador
-
-El administrador accede con un usuario y contraseña fijos:
-
-* Usuario: `admin`
-* Contraseña: `1234`
-
-### Funciones disponibles
-
-### Crear profesores
-
-Permite registrar profesores ingresando:
-
-* Usuario
-* Contraseña
-* Nombre
-* Apellido
+* usuario
+* contraseña
+* nombre
+* apellido
 * DNI
 
-El sistema valida que no exista otro profesor con el mismo DNI.
-
----
-
-### Crear alumnos
-
-Permite registrar alumnos ingresando:
-
-* Usuario
-* Contraseña
-* Nombre
-* Apellido
-* DNI
-
-El sistema valida que no exista otro alumno con el mismo DNI.
-
----
+## Funciones habilitadas
 
 ### Crear materias
 
-Permite crear nuevas materias cargando:
-
-* Nombre de la materia
-
-Las materias inicialmente se crean sin profesor asignado.
+El profesor puede crear nuevas materias y automáticamente queda asignado como docente de las mismas.
 
 ---
 
-## 2. Profesor
+### Configurar evaluaciones
 
-Los profesores pueden iniciar sesión con el usuario y contraseña creados por el administrador.
+Cada profesor puede definir las evaluaciones que tendrá su materia.
 
-### Funciones disponibles
+Puede crear:
 
-### Inscribirse como docente en una materia
+* 1 o 2 parciales
+* 1 o más recuperatorios
+* trabajos prácticos
+* participación en clase
+* final
+* recuperatorio final
 
-El profesor puede seleccionar una materia disponible para quedar asignado como docente.
-
-Restricción:
-
-* Una materia solo puede tener un profesor asignado.
-
----
-
-### Cargar cantidad de evaluaciones
-
-El profesor puede definir cuántas evaluaciones tendrá cada materia.
-
-Ejemplo:
-
-* 2 parciales
-* 3 evaluaciones
-* etc.
+Las evaluaciones son dinámicas, por lo que cada materia puede tener estructuras diferentes.
 
 ---
 
 ### Cargar notas
 
-El profesor puede ingresar las notas de todos los alumnos inscritos en la materia.
+El profesor puede cargar notas de todos los alumnos inscritos en cada evaluación configurada.
 
-El sistema guarda:
-
-* Las notas individuales
-* La relación entre alumno y materia
+El sistema habilita automáticamente los recuperatorios cuando corresponde.
 
 ---
 
-### Ver materias asignadas
+### Ver materias
 
-El profesor puede visualizar todas las materias donde está asignado como docente.
+Puede visualizar todas las materias que creó o tiene asignadas.
 
 ---
 
-## 3. Alumno
+### Ver alumnos y notas
 
-Los alumnos pueden iniciar sesión con el usuario y contraseña creados por el administrador.
+El profesor puede consultar:
 
-### Funciones disponibles
+* alumnos inscritos
+* notas de cada evaluación
+* promedio
+* estado académico final
+
+---
+
+# 2. Alumno
+
+El alumno puede registrarse e iniciar sesión con:
+
+* usuario
+* contraseña
+* nombre
+* apellido
+* DNI
+
+## Funciones habilitadas
 
 ### Inscribirse a materias
 
-El alumno puede seleccionar materias para cursar.
+Puede visualizar las materias disponibles e inscribirse.
 
-Restricción:
-
-* No puede inscribirse dos veces a la misma materia.
+El sistema evita inscripciones duplicadas.
 
 ---
 
-### Ver notas y promedio
+### Ver estado académico
 
-El alumno puede visualizar:
+El alumno puede consultar:
 
-* Sus notas por materia
-* El promedio final de cada materia
-* Su estado académico
+* todas sus notas
+* promedio de la materia
+* condición final
 
 ---
 
-# Cálculo de promedio y recuperatorio
+# Evaluaciones que soporta el sistema
 
-El sistema calcula automáticamente el promedio de cada materia:
+El sistema permite configurar dinámicamente:
 
-Promedio = notas / cant. de evaluaciones
+* Parciales
+* Recuperatorios
+* Trabajos prácticos
+* Participación
+* Final
+* Recuperatorio final
 
-### Regla de recuperatorio
+Cada materia puede tener distintas combinaciones de evaluaciones.
 
-* Si el promedio es menor a 6:
+---
 
-  * “Habilitado para recuperatorio”
-* Si el promedio es 6 o mayor:
+# Reglas académicas
 
-  * “No necesita recuperatorio”
+# Aprobación mínima
+
+Toda evaluación se aprueba con 4 o más.
+
+---
+
+# Promoción automática
+
+Si el alumno obtiene 8 o más en los dos parciales promociona la materia y no debe rendir final.
+
+---
+
+# Recuperatorios
+
+Si una evaluación desaprobada tiene recuperatorio configurado:
+
+* el sistema habilita automáticamente el recuperatorio correspondiente
+
+---
+
+# Aprobación de final
+
+Si el final es 4 o más:
+
+* el alumno aprueba la materia
+
+---
+
+# Recuperatorio final
+
+Si el final es menor a 4 se habilita recuperatorio final
+
+---
+
+# Aprobación por recuperatorio final
+
+Si el recuperatorio final es 4 o más se aprueba la materia, si no desaprueba la materia
+
+---
+
+# Cálculo de promedio
+
+El sistema calcula automáticamente el promedio utilizando todas las notas cargadas:
+
+Promedio = Notas cargadas / Cant. de evaluaciones
 
 ---
 
 # Validaciones implementadas
 
-El sistema incluye varias validaciones:
+## Validación de DNI
 
-* No permite crear profesores con DNI repetido.
-* No permite crear alumnos con DNI repetido.
-* No permite asignar más de un profesor a una materia.
-* No permite inscribir un alumno dos veces en la misma materia.
-* Verifica usuario y contraseña en cada login.
-* Muestra mensajes de error ante opciones inválidas.
+El sistema:
+
+* no permite dos profesores con el mismo DNI
+* no permite dos alumnos con el mismo DNI
+
+---
+
+## Validación de inscripción
+
+Un alumno no puede inscribirse dos veces en la misma materia
+
+---
+
+## Validación de login
+
+El sistema verifica:
+
+* usuario
+* contraseña
+
+antes de permitir el acceso.
+
+---
+
+# Estados académicos posibles
+
+El sistema puede mostrar:
+
+* Promociona
+* Regular
+* Aprobado
+* Aprobado por recuperatorio final
+* Debe rendir recuperatorio final
+* Desaprobado
+
+---
